@@ -1,5 +1,6 @@
 import dlt
 from pyspark.sql.functions import *
+from pyspark.sql.window import Window
 
 
 ## Reading the silver tables
@@ -66,18 +67,36 @@ def dim_products():
     df = dlt.read("silver_products")
     return df
 
+
+
 @dlt.table(
-    name="dim_sellers",  
+    name="dim_sellers",
     comment="Seller dimension with SCD2 tracking"
 )
 def dim_sellers():
-    return dlt.apply_changes(
-        source="silver_sellers",          
-        keys=["seller_id"],               
-        sequence_by=col("last_update_date"), 
-        stored_as_scd_type=2,             
-        target="dim_sellers_internal_scd2" 
+
+    # Read SILVER table directly from Unity Catalog
+    sellers = dlt.read("silver_sellers")
+
+    window_spec = Window.partitionBy("seller_id").orderBy("last_update_date")
+
+    sellers = sellers.withColumn("row_num", row_number().over(window_spec))
+
+    sellers = sellers.withColumn("effective_start", col("last_update_date"))
+
+    sellers = sellers.withColumn(
+        "effective_end",
+        lead("last_update_date").over(window_spec)
     )
+
+    sellers = sellers.withColumn(
+        "is_current",
+        when(col("effective_end").isNull(), lit(True)).otherwise(lit(False))
+    )
+
+    sellers = sellers.drop("row_num")
+
+    return sellers
 
 
 @dlt.table
