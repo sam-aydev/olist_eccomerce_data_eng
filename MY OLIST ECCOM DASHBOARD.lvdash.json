@@ -1,0 +1,353 @@
+{
+  "datasets": [
+    {
+      "name": "2a9ec39a",
+      "displayName": "repeat vs new customer",
+      "queryLines": [
+        "SELECT \r\n",
+        "    CASE WHEN order_count > 1 THEN 'Repeat Customer'\r\n",
+        "         ELSE 'New Customer' END AS customer_type,\r\n",
+        "    COUNT(*) AS count\r\n",
+        "FROM (\r\n",
+        "    SELECT customer_id, COUNT(*) AS order_count\r\n",
+        "    FROM olist_eccom_catalog.gold.fact_orders\r\n",
+        "    GROUP BY customer_id\r\n",
+        ")\r\n",
+        "GROUP BY customer_type;"
+      ],
+      "catalog": "olist_eccom_catalog",
+      "schema": "gold"
+    },
+    {
+      "name": "fdb4b563",
+      "displayName": "customer by state",
+      "queryLines": [
+        "SELECT customer_state, COUNT(*) AS customer_count\r\n",
+        "FROM olist_eccom_catalog.gold.dim_customers\r\n",
+        "GROUP BY customer_state\r\n",
+        "ORDER BY customer_count DESC;"
+      ]
+    },
+    {
+      "name": "246060e3",
+      "displayName": "total customers",
+      "queryLines": [
+        "SELECT COUNT(*) AS total_customers\r\n",
+        "FROM olist_eccom_catalog.gold.dim_customers;"
+      ]
+    },
+    {
+      "name": "cbc596d4",
+      "displayName": "active sellers over time",
+      "queryLines": [
+        "SELECT order_approved_at::date AS date,\r\n",
+        "       COUNT(DISTINCT seller_id) AS active_sellers\r\n",
+        "FROM olist_eccom_catalog.gold.fact_orders\r\n",
+        "GROUP BY date\r\n",
+        "ORDER BY date;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "02341383",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "22fae427",
+            "queries": [
+              {
+                "name": "dashboards/01f0c8cdc5591e99a354c5b5fc2d0634/datasets/01f0c8d02cd51cbd9bcb2e11a3f37ed7_customer_type",
+                "query": {
+                  "datasetName": "2a9ec39a",
+                  "fields": [
+                    {
+                      "name": "customer_type",
+                      "expression": "`customer_type`"
+                    },
+                    {
+                      "name": "customer_type_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "customer_type",
+                    "queryName": "dashboards/01f0c8cdc5591e99a354c5b5fc2d0634/datasets/01f0c8d02cd51cbd9bcb2e11a3f37ed7_customer_type"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "1b7cef60",
+            "queries": [
+              {
+                "name": "dashboards/01f0c8cdc5591e99a354c5b5fc2d0634/datasets/01f0c8d02cd51cbd9bcb2e11a3f37ed7_count",
+                "query": {
+                  "datasetName": "2a9ec39a",
+                  "fields": [
+                    {
+                      "name": "count",
+                      "expression": "`count`"
+                    },
+                    {
+                      "name": "count_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "count",
+                    "queryName": "dashboards/01f0c8cdc5591e99a354c5b5fc2d0634/datasets/01f0c8d02cd51cbd9bcb2e11a3f37ed7_count"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    },
+    {
+      "name": "152f5c2a",
+      "displayName": "dashboards",
+      "layout": [
+        {
+          "widget": {
+            "name": "0da35e90",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2a9ec39a",
+                  "fields": [
+                    {
+                      "name": "sum(count)",
+                      "expression": "SUM(`count`)"
+                    },
+                    {
+                      "name": "customer_type",
+                      "expression": "`customer_type`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "customer_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "title": "Repeat vs New Customer ",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "caa512c0",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fdb4b563",
+                  "fields": [
+                    {
+                      "name": "customer_state",
+                      "expression": "`customer_state`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "fieldName": "customer_state",
+                    "type": "field",
+                    "geographicRole": "admin0-unit-code"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Customers By State"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "7623fe27",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "246060e3",
+                  "fields": [
+                    {
+                      "name": "sum(total_customers)",
+                      "expression": "SUM(`total_customers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "target": {
+                  "fieldName": "sum(total_customers)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Customers count"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 6,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "a1c14908",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cbc596d4",
+                  "fields": [
+                    {
+                      "name": "monthly(date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `date`)"
+                    },
+                    {
+                      "name": "sum(active_sellers)",
+                      "expression": "SUM(`active_sellers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(active_sellers)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Active Sellers Over Time",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 3,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
