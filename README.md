@@ -1,1 +1,25 @@
-# olist_eccomerce_data_eng
+# OLIST ECCOMERCE PROJECT (ETL)
+
+        Raw CSV Files(in Voluum)
+                 ↓
+   ┌───────────────────────────┐
+   │        BRONZE LAYER       │
+   │ Raw ingested Delta tables │
+   └───────────────────────────┘
+                 ↓
+      (Cleansing, Validation)
+                 ↓
+   ┌───────────────────────────┐
+   │        SILVER LAYER       │
+   │ Clean, standardized data  │
+   └───────────────────────────┘
+                 ↓
+       (Modeling, Joins, SCD)
+                 ↓
+ ┌───────────────────────────────┐
+ │          GOLD LAYER (DLT)     │
+ │    Dim tables | Fact tables   │
+ └───────────────────────────────┘
+                ↓
+         Lakeview Dashboard
+    (using Databricks Dashboard)
